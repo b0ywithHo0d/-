@@ -1,5 +1,5 @@
 import streamlit as st
-from openai import OpenAI
+import openai
 from regulations import library_regulation
 
 st.set_page_config(page_title="부경대 도서관 챗봇", layout="centered")
@@ -7,12 +7,13 @@ st.set_page_config(page_title="부경대 도서관 챗봇", layout="centered")
 st.title("📚 국립부경대학교 도서관 챗봇 (GPT 기반)")
 st.markdown("도서관 규정에 기반한 질문에 답해드립니다.")
 
+# 🔑 API 키 입력
 api_key = st.secrets.get("openai_api_key") or st.text_input("🔑 OpenAI API 키를 입력하세요", type="password")
 
 user_input = st.text_input("질문을 입력하세요:")
 
 if api_key and user_input:
-    client = OpenAI(api_key=api_key)
+    openai.api_key = api_key
 
     system_prompt = f"""
 너는 국립부경대학교 도서관의 규정을 잘 알고 있는 도서관 상담 챗봇이야.
@@ -26,14 +27,14 @@ if api_key and user_input:
 """
 
     with st.spinner("GPT가 답변을 작성 중입니다..."):
-        chat_response = client.chat.completions.create(
-            model="gpt-4",
+        response = openai.chat.completions.create(
+            model="gpt-4o",  # ✅ 또는 "gpt-4-turbo"
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_input}
             ],
-            temperature=0.3,
+            temperature=0.3
         )
 
-        answer = chat_response.choices[0].message.content
+        answer = response.choices[0].message.content
         st.success(answer)
